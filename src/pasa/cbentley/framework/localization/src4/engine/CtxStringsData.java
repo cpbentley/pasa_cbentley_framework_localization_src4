@@ -10,25 +10,31 @@ import pasa.cbentley.core.src4.io.XString;
 import pasa.cbentley.core.src4.logging.Dctx;
 import pasa.cbentley.core.src4.logging.IDLog;
 import pasa.cbentley.core.src4.logging.IStringable;
-import pasa.cbentley.framework.localization.src4.ctx.StrLoaderCtx;
+import pasa.cbentley.framework.localization.src4.ctx.LocalizationCtx;
 import pasa.cbentley.powerdata.spec.src4.power.IPowerCharCollector;
 import pasa.cbentley.powerdata.spec.src4.power.IPowerDataTypes;
 import pasa.cbentley.powerdata.spec.src4.power.itech.ITechMorph;
 import pasa.cbentley.powerdata.spec.src4.power.itech.ITechPointerStruct;
 
+/**
+ * Base class for access data objects of {@link LocalizationCtx}
+ * 
+ * @author Charles Bentley
+ *
+ */
 public class CtxStringsData implements IStringable {
 
-   protected final StrLoaderCtx slc;
+   protected final LocalizationCtx slc;
 
-   protected final UCtx         uc;
+   protected final UCtx            uc;
 
-   private IPowerCharCollector  charscollector;
+   private IPowerCharCollector     charscollector;
 
-   private ICtx                 ctx;
+   private ICtx                    ctx;
 
-   private String[]             paths;
+   private String[]                paths;
 
-   public CtxStringsData(StrLoaderCtx slc) {
+   public CtxStringsData(LocalizationCtx slc) {
       this.slc = slc;
       this.uc = slc.getUCtx();
    }
@@ -53,7 +59,7 @@ public class CtxStringsData implements IStringable {
       return ctx;
    }
 
-   public void loadCC() {
+   public void loadStringDataStruct() {
       //we define what kind of char collector we want. Factory will create one for us.
       ByteObjectManaged tech = slc.getPDC().getMorphTech().getPointerTech(IPowerDataTypes.INT_22_CHAR_COLLECTOR, ITechMorph.MODE_1_BUILD);
       //the tech? we need to define the start pointer
@@ -128,7 +134,7 @@ public class CtxStringsData implements IStringable {
    public void toString(Dctx dc) {
       dc.root(this, "StModule");
       toStringPrivate(dc);
-      dc.nlLvlArray1Line("Paths", paths);
+      dc.nlLvlArray1Line(paths, "Paths");
       dc.nlLvl("CharCollector", charscollector);
    }
 

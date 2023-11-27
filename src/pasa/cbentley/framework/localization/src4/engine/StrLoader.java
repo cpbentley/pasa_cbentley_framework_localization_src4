@@ -1,30 +1,20 @@
 package pasa.cbentley.framework.localization.src4.engine;
 
-import java.io.InputStream;
-
-import pasa.cbentley.byteobjects.src4.core.ByteObjectManaged;
-import pasa.cbentley.byteobjects.src4.interfaces.IJavaObjectFactory;
 import pasa.cbentley.core.src4.ctx.ICtx;
+import pasa.cbentley.core.src4.ctx.IFlagsToString;
 import pasa.cbentley.core.src4.ctx.UCtx;
 import pasa.cbentley.core.src4.i8n.IString;
 import pasa.cbentley.core.src4.i8n.IStringMapper;
 import pasa.cbentley.core.src4.i8n.IStringProducer;
 import pasa.cbentley.core.src4.i8n.LString;
 import pasa.cbentley.core.src4.i8n.LocaleID;
-import pasa.cbentley.core.src4.i8n.StringProdBase;
-import pasa.cbentley.core.src4.io.FileReader;
-import pasa.cbentley.core.src4.io.XString;
+import pasa.cbentley.core.src4.i8n.StringProducerAbstract;
 import pasa.cbentley.core.src4.logging.Dctx;
 import pasa.cbentley.core.src4.logging.IStringable;
 import pasa.cbentley.core.src4.structs.IntToObjects;
 import pasa.cbentley.core.src4.structs.IntToStrings;
-import pasa.cbentley.framework.localization.src4.ctx.StrLoaderCtx;
-import pasa.cbentley.powerdata.spec.src4.IFactoryIDStruct;
+import pasa.cbentley.framework.localization.src4.ctx.LocalizationCtx;
 import pasa.cbentley.powerdata.spec.src4.power.IPowerCharCollector;
-import pasa.cbentley.powerdata.spec.src4.power.IPowerDataTypes;
-import pasa.cbentley.powerdata.spec.src4.power.itech.ITechMorph;
-import pasa.cbentley.powerdata.spec.src4.power.itech.ITechPointerStruct;
-import pasa.cbentley.powerdata.spec.src4.power.itech.MorphTech;
 
 /**
  * Class that loads strings into a {@link IPowerCharCollector} using the active language suffix
@@ -37,40 +27,27 @@ import pasa.cbentley.powerdata.spec.src4.power.itech.MorphTech;
  * <br>
  * <br>
  * Applications using this package
+ * 
+ * 
  * @author Charles-Philip Bentley
  *
  */
-public class StrLoader extends StringProdBase implements IStringMapper, IStringProducer, IStringable {
+public class StrLoader extends StringProducerAbstract implements IStringMapper, IStringProducer, IStringable {
 
-   public static final int MODULE_ID = 15;
+   public static final int         MODULE_ID = 15;
 
-   /**
-    * TODO remove this. no need anymore with unique static constants
-    * Returns a unique String identifier. The module is stored in the high bits.
-    * <br>
-    * <br>
-    * Line number is actually id + 2. +1 cuz of first line comment, +1 because lines are 1index based instead of 0-index based
-    * <br>
-    * @param moduleID  the id of the charcollector
-    * @param id the id of the string. i.e the line number on which it is located
-    * @return
-    */
-   public static int getID(int moduleID, int id) {
-      return ((moduleID & 0xFFFF) << 16) + (id & 0x0000FFFF);
-   }
+   private IntToStrings            dataModel;
 
-   private IntToStrings         dataModel;
+   protected final LocalizationCtx loc;
 
-   protected final StrLoaderCtx slc;
+   private int                     staticForStringIDs;
 
-   private int                  staticForStringIDs;
-
-   protected final UCtx         uc;
+   protected final UCtx            uc;
 
    /**
     * Contains all the {@link CtxStringsData}
     */
-   protected IntToObjects       v;
+   protected IntToObjects          v;
 
    /**
     * TODO When the App launcher launches, it decides which number of additional slots are used.
@@ -80,10 +57,10 @@ public class StrLoader extends StringProdBase implements IStringMapper, IStringP
     *<br>
     * @param num
     */
-   public StrLoader(StrLoaderCtx slc, LocaleID[] lids) {
-      super(slc.getUCtx(), lids);
-      this.slc = slc;
-      this.uc = slc.getUCtx();
+   public StrLoader(LocalizationCtx loc, LocaleID[] lids) {
+      super(loc.getUCtx(), lids);
+      this.loc = loc;
+      this.uc = loc.getUCtx();
       v = new IntToObjects(uc);
    }
 
@@ -117,7 +94,7 @@ public class StrLoader extends StringProdBase implements IStringMapper, IStringP
    }
 
    public StrLocal get(int id) {
-      StrLocal sl = new StrLocal(slc, id);
+      StrLocal sl = new StrLocal(loc, id);
       return sl;
    }
 
@@ -130,10 +107,10 @@ public class StrLoader extends StringProdBase implements IStringMapper, IStringP
     * @return
     */
    public char[] getCharArray(int id) {
-      int mod = (id >> 16) & 0xFFFF;
-      int sid = id & 0x0000FFFF;
-      IPowerCharCollector cc = getCharCol(sid, mod);
-      return cc.getChars(sid);
+      int ctxIDCharColID = LocUtils.getCtxIDFromLocID(id);
+      int strID = LocUtils.getStrIDFromLocID(id);
+      IPowerCharCollector cc = getCharCol(strID, ctxIDCharColID);
+      return cc.getChars(strID);
    }
 
    /**
@@ -146,32 +123,32 @@ public class StrLoader extends StringProdBase implements IStringMapper, IStringP
       CtxStringsData sm = (CtxStringsData) v.findIntObject(mod);
       if (sm != null) {
          if (sm.getCharscollector() == null) {
-            sm.loadCC();
+            sm.loadStringDataStruct();
          }
          return sm.getCharscollector();
       } else {
-         throw new IllegalArgumentException("ModuleID = " + mod + "not found. StringID=" + sid);
+         throw new IllegalArgumentException("ModuleID = " + mod + " not found. StringID=" + sid);
       }
    }
 
    public IString getIString(int key) {
-      StrLocal sl = new StrLocal(slc, key);
+      StrLocal sl = new StrLocal(loc, key);
       return sl;
    }
 
    public IString getIString(String key, String def) {
-      LString sl = new LString(uc, key, def);
+      LString sl = new LString(this, key, def);
       return sl;
    }
 
    public IString getIString(String key, String def, String suffix) {
-      LString sl = new LString(uc, key, def);
+      LString sl = new LString(this, key, def);
       sl.setSuffix(suffix);
       return sl;
    }
 
    public IString getIStringKey(int key, String def) {
-      LString sl = new LString(uc, key, def);
+      LString sl = new LString(this, key, def);
       return sl;
    }
 
@@ -198,6 +175,11 @@ public class StrLoader extends StringProdBase implements IStringMapper, IStringP
 
    public int getModuleID() {
       return MODULE_ID;
+   }
+
+   public int getProducerID() {
+      // TODO Auto-generated method stub
+      return 0;
    }
 
    /**
@@ -249,13 +231,13 @@ public class StrLoader extends StringProdBase implements IStringMapper, IStringP
     */
    public void loads(ICtx module, String[] fileRoots) {
       int id = module.getRegistrationID();
-      CtxStringsData sm = new CtxStringsData(slc);
+      CtxStringsData sm = new CtxStringsData(loc);
       sm.setLoader(module);
       sm.setPaths(fileRoots);
       v.ensureRoom(id, 1);
       int modid = module.getCtxID();
       v.setObjectAndInt(sm, modid, id);
-      sm.loadCC();
+      sm.loadStringDataStruct();
    }
 
    public String map(int key) {
@@ -311,13 +293,13 @@ public class StrLoader extends StringProdBase implements IStringMapper, IStringP
    }
 
    public void toString(Dctx dc) {
-      dc.root(this, "StrLoader");
+      dc.root(this, StrLoader.class);
       super.toString(dc);
       dc.nlVar("staticForStringIDs", staticForStringIDs);
       dc.nlLvl("Data Model", dataModel);
       dc.nl();
       //tell context we want full toString of sub objects
-      dc.nlLvl("StModules", v, Dctx.FLAG_1_EXPAND);
+      dc.nlLvl("StModules", v, IFlagsToString.FLAG_1_EXPAND);
       //we want the DeviceDebug to appear here and never in other object
    }
 
@@ -326,14 +308,8 @@ public class StrLoader extends StringProdBase implements IStringMapper, IStringP
    }
 
    public void toString1Line(Dctx dc) {
-      dc.appendName(this.getClass());
-      dc.append(" ");
+      dc.root1Line(this,StrLoader.class);
       current.toString1Line(dc);
-   }
-
-   public int getProducerID() {
-      // TODO Auto-generated method stub
-      return 0;
    }
 
    //#enddebug

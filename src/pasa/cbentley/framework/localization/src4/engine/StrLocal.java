@@ -2,7 +2,7 @@ package pasa.cbentley.framework.localization.src4.engine;
 
 import pasa.cbentley.core.src4.i8n.IString;
 import pasa.cbentley.core.src4.i8n.LString;
-import pasa.cbentley.framework.localization.src4.ctx.StrLoaderCtx;
+import pasa.cbentley.framework.localization.src4.ctx.LocalizationCtx;
 
 /**
  * Encapsulates the localized String.
@@ -14,15 +14,15 @@ import pasa.cbentley.framework.localization.src4.ctx.StrLoaderCtx;
  */
 public class StrLocal extends LString implements IString {
 
-   public StrLoaderCtx loader;
+   public LocalizationCtx loader;
 
    /**
     * This module only deals with
     * @param loader
     * @param id
     */
-   StrLocal(StrLoaderCtx loader, int id) {
-      super(loader.getUCtx(), id, null);
+   StrLocal(LocalizationCtx loader, int id) {
+      super(loader.getLoader(), id, null);
       this.loader = loader;
    }
 
