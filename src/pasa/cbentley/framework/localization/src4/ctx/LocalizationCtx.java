@@ -10,8 +10,8 @@ import pasa.cbentley.core.src4.i8n.ILocale;
 import pasa.cbentley.core.src4.i8n.IString;
 import pasa.cbentley.core.src4.i8n.LocaleID;
 import pasa.cbentley.core.src4.logging.Dctx;
-import pasa.cbentley.framework.localization.src4.engine.StrLoader;
-import pasa.cbentley.framework.localization.src4.engine.StrLocal;
+import pasa.cbentley.framework.localization.src4.engine.LStringFramework;
+import pasa.cbentley.framework.localization.src4.engine.StringProducerFramework;
 import pasa.cbentley.powerdata.spec.src4.IFactoryIDStruct;
 import pasa.cbentley.powerdata.spec.src4.ctx.PDCtxA;
 
@@ -23,26 +23,37 @@ import pasa.cbentley.powerdata.spec.src4.ctx.PDCtxA;
  * {@link PDCtxA} is provided in the constructor and cannot be null.
  * </p>
  * 
+ *  When loading without users settings, read all values.
+ *  If settings have a locale. use it directly and do not load
  * <p>
  * {@link IConfigLoc} 
  * </p>
  * 
  * <p>
- * Implements the {@link IString} with {@link StrLocal}
+ * Implements the {@link IString} with {@link LStringFramework}
  * </p>
  * @author Charles Bentley
  *
  */
 public class LocalizationCtx extends ABOCtx {
 
-   public static final int CTX_ID = 300;
+   public static final int         CTX_ID = 30;
 
-   protected final PDCtxA  pdc;
+   protected final PDCtxA          pdc;
 
-   private StrLoader       strLoader;
+   private StringProducerFramework strLoader;
+
+   private String[]                locales;
 
    public LocalizationCtx(IConfigLoc config, UCtx uc, BOCtx boc, PDCtxA pdc) {
       super(config, boc);
+      //#mdebug
+      if (pdc == null) {
+         throw new NullPointerException();
+      }
+      //#enddebug
+
+      locales = config.getSupportedLocales();
       this.pdc = pdc;
 
       //TODO current locale saved in settings
@@ -50,26 +61,55 @@ public class LocalizationCtx extends ABOCtx {
       LocaleID[] lids = new LocaleID[1];
       lids[0] = new LocaleID(uc, ILocale.NAME_0_EN, ILocale.SUFFIX_0_EN);
 
-      strLoader = new StrLoader(this, lids);
+      strLoader = new StringProducerFramework(this, lids);
+
+      if (this.getClass() == LocalizationCtx.class) {
+         a_Init();
+      }
+   }
+
+   /**
+    * Add the given local in the list of loaded.
+    * 
+    * Does nothing if already there.
+    * @param locale
+    */
+   public void addLocale(LocaleID locale) {
+      // TODO Auto-generated method stub
+
+   }
+
+   /**
+    * Called by the {@link ABOCtx#a_Init()} method or whenever settings are changed.
+    * 
+    * Apply the current locale
+    */
+   protected void applySettings(ByteObject settingsNew, ByteObject settingsOld) {
+
+      int id = settingsNew.get2(ITechCtxSettingsLoc.CTX_LOC_OFFSET_02_LOC_ID2);
+      if(id < 0 || id >= locales.length) {
+         throw new IllegalArgumentException();
+      }
+      String suffix = locales[id];
+      String name = locales[id+1];
+      LocaleID localID = new LocaleID(uc, name, suffix);
+
+      //TODO apply local
+   }
+
+   public int getBOCtxSettingSize() {
+      return ITechCtxSettingsLoc.CTX_LOC_BASIC_SIZE;
    }
 
    public int getCtxID() {
       return CTX_ID;
    }
 
-   protected void matchConfig(IConfigBO config, ByteObject settings) {
-      IConfigLoc configLoc = (IConfigLoc) config;
+   public IJavaObjectFactory getFactory() {
+      return getPDC().getFactory(IFactoryIDStruct.ID);
    }
 
-   protected void applySettings(ByteObject settingsNew, ByteObject settingsOld) {
-
-   }
-
-   public int getBOCtxSettingSize() {
-      return ITechCtxSettingsLocalization.MODSET_LOC_BASIC_SIZE;
-   }
-
-   public StrLoader getLoader() {
+   public StringProducerFramework getLoader() {
       return strLoader;
    }
 
@@ -77,26 +117,44 @@ public class LocalizationCtx extends ABOCtx {
       return pdc;
    }
 
-   public IJavaObjectFactory getFactory() {
-      return getPDC().getFactory(IFactoryIDStruct.ID);
+   /**
+    * We ignore saved settings. Burn config into settings {@link ByteObject}
+    */
+   protected void matchConfig(IConfigBO config, ByteObject settings) {
+      IConfigLoc configLoc = (IConfigLoc) config;
+      String suffix = configLoc.getLocalSuffix();
+      int id = getLocaleIDFromSuffix(suffix);
+      //check flag to see 
+      settings.set2(ITechCtxSettingsLoc.CTX_LOC_OFFSET_02_LOC_ID2, id);
+
+      if (suffix.length() != 2) {
+         //bad input
+         throw new IllegalArgumentException("config suffix must be 2 characters");
+      }
+
+   }
+
+   private int getLocaleIDFromSuffix(String suffix) {
+      // TODO Auto-generated method stub
+      return 0;
    }
 
    //#mdebug
    public void toString(Dctx dc) {
-      dc.root(this, "StrLoaderCtx");
+      dc.root(this, "LocalizationCtx", "92");
       toStringPrivate(dc);
       dc.nlLvlNullTitle("Factory", getFactory());
       super.toString(dc.sup());
    }
 
-   private void toStringPrivate(Dctx dc) {
-
-   }
-
    public void toString1Line(Dctx dc) {
-      dc.root1Line(this, "StrLoaderCtx");
+      dc.root1Line(this, "LocalizationCtx");
       toStringPrivate(dc);
       super.toString1Line(dc.sup1Line());
+   }
+
+   private void toStringPrivate(Dctx dc) {
+
    }
 
    //#enddebug

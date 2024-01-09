@@ -12,7 +12,7 @@ import pasa.cbentley.framework.localization.src4.ctx.LocalizationCtx;
  * @author Charles-Philip Bentley
  *
  */
-public class StrLocal extends LString implements IString {
+public class LStringFramework extends LString implements IString {
 
    public LocalizationCtx loader;
 
@@ -21,7 +21,7 @@ public class StrLocal extends LString implements IString {
     * @param loader
     * @param id
     */
-   StrLocal(LocalizationCtx loader, int id) {
+   LStringFramework(LocalizationCtx loader, int id) {
       super(loader.getLoader(), id, null);
       this.loader = loader;
    }

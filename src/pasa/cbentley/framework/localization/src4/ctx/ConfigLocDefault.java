@@ -15,4 +15,16 @@ public class ConfigLocDefault extends ConfigAbstractBO implements IConfigLoc {
       super(uc);
    }
 
+   public String getLocalSuffix() {
+      return "en";
+   }
+
+   public String getSingleLocaleSuffix() {
+      return "en";
+   }
+
+   public String[] getSupportedLocales() {
+      return BentleyLocales.get();
+   }
+
 }

@@ -32,7 +32,7 @@ import pasa.cbentley.powerdata.spec.src4.power.IPowerCharCollector;
  * @author Charles-Philip Bentley
  *
  */
-public class StrLoader extends StringProducerAbstract implements IStringMapper, IStringProducer, IStringable {
+public class StringProducerFramework extends StringProducerAbstract implements IStringMapper, IStringProducer, IStringable {
 
    public static final int         MODULE_ID = 15;
 
@@ -45,9 +45,9 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
    protected final UCtx            uc;
 
    /**
-    * Contains all the {@link CtxStringsData}
+    * Contains all the {@link CtxStringsData} with its {@link ICtx#getCtxID()} as integer key
     */
-   protected IntToObjects          v;
+   protected IntToObjects          ctxStringDatas;
 
    /**
     * TODO When the App launcher launches, it decides which number of additional slots are used.
@@ -57,15 +57,20 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
     *<br>
     * @param num
     */
-   public StrLoader(LocalizationCtx loc, LocaleID[] lids) {
+   public StringProducerFramework(LocalizationCtx loc, LocaleID[] lids) {
       super(loc.getUCtx(), lids);
       this.loc = loc;
       this.uc = loc.getUCtx();
-      v = new IntToObjects(uc);
+      ctxStringDatas = new IntToObjects(uc);
    }
 
    /**
-    * TODO ask user if profile based or device based.
+    * When loading without users settings, read all values.
+    * If settings have a locale. use it directly and do not load
+    * 
+    * 
+    * TODO ask user if profile based or device based. ?
+    * 
     * Data can be copied profile <-> device
     */
    public LocaleID addLocaleID(String name, String suffix) {
@@ -88,13 +93,13 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
     * @param id
     */
    public void dispose(int id) {
-      CtxStringsData sm = (CtxStringsData) v.getObjectAtIndex(id);
+      CtxStringsData sm = (CtxStringsData) ctxStringDatas.getObjectAtIndex(id);
       sm.getCharscollector().closeAgent();
       sm.setCharscollector(null);
    }
 
-   public StrLocal get(int id) {
-      StrLocal sl = new StrLocal(loc, id);
+   public LStringFramework get(int id) {
+      LStringFramework sl = new LStringFramework(loc, id);
       return sl;
    }
 
@@ -114,25 +119,27 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
    }
 
    /**
-    * Returns the char collector
+    * Returns the char collector associated with module ID
     * @param sid
     * @param mod
     * @return
     */
    private IPowerCharCollector getCharCol(int sid, int mod) {
-      CtxStringsData sm = (CtxStringsData) v.findIntObject(mod);
+      CtxStringsData sm = (CtxStringsData) ctxStringDatas.findIntObject(mod);
       if (sm != null) {
          if (sm.getCharscollector() == null) {
             sm.loadStringDataStruct();
          }
          return sm.getCharscollector();
       } else {
+         //#debug
+         toDLog().pNull("msg", this, StringProducerFramework.class, "getCharCol", LVL_05_FINE, false);
          throw new IllegalArgumentException("ModuleID = " + mod + " not found. StringID=" + sid);
       }
    }
 
    public IString getIString(int key) {
-      StrLocal sl = new StrLocal(loc, key);
+      LStringFramework sl = new LStringFramework(loc, key);
       return sl;
    }
 
@@ -190,6 +197,8 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
    public String getString(int id) {
       int mod = (id >> 16) & 0xFFFF;
       int sid = id & 0x0000FFFF;
+      //#debug
+      toDLog().pFlow("[" + mod + " - " + sid + "]", this, StringProducerFramework.class, "getString", LVL_04_FINER, true);
       String str = "";
       try {
          IPowerCharCollector cc = getCharCol(sid, mod);
@@ -198,7 +207,7 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
          e.printStackTrace();
          str = "String Error [" + mod + "," + sid + "]";
          //#debug
-         toDLog().pEx("msg", this, StrLoader.class, "getString", e);
+         toDLog().pEx("msg", this, StringProducerFramework.class, "getString", e);
       }
       if (str == null || str.length() == 0) {
          str = "String  [" + mod + "," + sid + "]";
@@ -231,13 +240,16 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
     */
    public void loads(ICtx module, String[] fileRoots) {
       int id = module.getRegistrationID();
-      CtxStringsData sm = new CtxStringsData(loc);
-      sm.setLoader(module);
-      sm.setPaths(fileRoots);
-      v.ensureRoom(id, 1);
+      CtxStringsData ctxStringData = new CtxStringsData(loc);
+      ctxStringData.setLoader(module);
+      ctxStringData.setPaths(fileRoots);
+      
+      //link
+      ctxStringDatas.ensureRoom(id, 1);
       int modid = module.getCtxID();
-      v.setObjectAndInt(sm, modid, id);
-      sm.loadStringDataStruct();
+      ctxStringDatas.setObjectAndInt(ctxStringData, modid, id);
+
+      ctxStringData.loadStringDataStruct();
    }
 
    public String map(int key) {
@@ -293,13 +305,13 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
    }
 
    public void toString(Dctx dc) {
-      dc.root(this, StrLoader.class);
+      dc.root(this, StringProducerFramework.class);
       super.toString(dc);
       dc.nlVar("staticForStringIDs", staticForStringIDs);
       dc.nlLvl("Data Model", dataModel);
       dc.nl();
       //tell context we want full toString of sub objects
-      dc.nlLvl("StModules", v, IFlagsToString.FLAG_1_EXPAND);
+      dc.nlLvl("StModules", ctxStringDatas, IFlagsToString.FLAG_1_EXPAND);
       //we want the DeviceDebug to appear here and never in other object
    }
 
@@ -308,7 +320,7 @@ public class StrLoader extends StringProducerAbstract implements IStringMapper, 
    }
 
    public void toString1Line(Dctx dc) {
-      dc.root1Line(this,StrLoader.class);
+      dc.root1Line(this,StringProducerFramework.class);
       current.toString1Line(dc);
    }
 
