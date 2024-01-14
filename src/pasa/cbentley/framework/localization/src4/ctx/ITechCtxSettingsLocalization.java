@@ -1,8 +1,8 @@
 package pasa.cbentley.framework.localization.src4.ctx;
 
-import pasa.cbentley.byteobjects.src4.tech.ITechCtxSettings;
+import pasa.cbentley.byteobjects.src4.core.interfaces.IBOCtxSettings;
 
-public interface ITechCtxSettingsLocalization extends ITechCtxSettings {
+public interface ITechCtxSettingsLocalization extends IBOCtxSettings {
 
    public static final int MODSET_LOC_BASIC_SIZE              = CTX_BASIC_SIZE + 5;
 

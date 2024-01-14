@@ -1,10 +1,10 @@
 package pasa.cbentley.framework.localization.src4.ctx;
 
 import pasa.cbentley.byteobjects.src4.core.ByteObject;
+import pasa.cbentley.byteobjects.src4.core.interfaces.IJavaObjectFactory;
 import pasa.cbentley.byteobjects.src4.ctx.ABOCtx;
 import pasa.cbentley.byteobjects.src4.ctx.BOCtx;
 import pasa.cbentley.byteobjects.src4.ctx.IConfigBO;
-import pasa.cbentley.byteobjects.src4.interfaces.IJavaObjectFactory;
 import pasa.cbentley.core.src4.ctx.UCtx;
 import pasa.cbentley.core.src4.i8n.ILocale;
 import pasa.cbentley.core.src4.i8n.IString;

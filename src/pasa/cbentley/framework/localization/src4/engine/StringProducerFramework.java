@@ -1,7 +1,7 @@
 package pasa.cbentley.framework.localization.src4.engine;
 
 import pasa.cbentley.core.src4.ctx.ICtx;
-import pasa.cbentley.core.src4.ctx.IFlagsToString;
+import pasa.cbentley.core.src4.ctx.IToStringFlags;
 import pasa.cbentley.core.src4.ctx.UCtx;
 import pasa.cbentley.core.src4.i8n.IString;
 import pasa.cbentley.core.src4.i8n.IStringMapper;
@@ -311,7 +311,7 @@ public class StringProducerFramework extends StringProducerAbstract implements I
       dc.nlLvl("Data Model", dataModel);
       dc.nl();
       //tell context we want full toString of sub objects
-      dc.nlLvl("StModules", ctxStringDatas, IFlagsToString.FLAG_1_EXPAND);
+      dc.nlLvl("StModules", ctxStringDatas, IToStringFlags.FLAG_1_EXPAND);
       //we want the DeviceDebug to appear here and never in other object
    }
 
