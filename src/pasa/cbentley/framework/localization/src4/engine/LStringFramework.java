@@ -1,6 +1,6 @@
 package pasa.cbentley.framework.localization.src4.engine;
 
-import pasa.cbentley.core.src4.i8n.IString;
+import pasa.cbentley.core.src4.i8n.I8nString;
 import pasa.cbentley.core.src4.i8n.LString;
 import pasa.cbentley.framework.localization.src4.ctx.LocalizationCtx;
 
@@ -12,7 +12,7 @@ import pasa.cbentley.framework.localization.src4.ctx.LocalizationCtx;
  * @author Charles-Philip Bentley
  *
  */
-public class LStringFramework extends LString implements IString {
+public class LStringFramework extends LString implements I8nString {
 
    public LocalizationCtx loader;
 

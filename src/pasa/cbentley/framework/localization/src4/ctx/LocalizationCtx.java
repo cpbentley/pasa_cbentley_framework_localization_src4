@@ -7,7 +7,7 @@ import pasa.cbentley.byteobjects.src4.ctx.BOCtx;
 import pasa.cbentley.byteobjects.src4.ctx.IConfigBO;
 import pasa.cbentley.core.src4.ctx.UCtx;
 import pasa.cbentley.core.src4.i8n.ILocale;
-import pasa.cbentley.core.src4.i8n.IString;
+import pasa.cbentley.core.src4.i8n.I8nString;
 import pasa.cbentley.core.src4.i8n.LocaleID;
 import pasa.cbentley.core.src4.logging.Dctx;
 import pasa.cbentley.framework.localization.src4.engine.LStringFramework;
@@ -30,7 +30,7 @@ import pasa.cbentley.powerdata.spec.src4.ctx.PDCtxA;
  * </p>
  * 
  * <p>
- * Implements the {@link IString} with {@link LStringFramework}
+ * Implements the {@link I8nString} with {@link LStringFramework}
  * </p>
  * @author Charles Bentley
  *

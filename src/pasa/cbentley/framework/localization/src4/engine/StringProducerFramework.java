@@ -3,7 +3,7 @@ package pasa.cbentley.framework.localization.src4.engine;
 import pasa.cbentley.core.src4.ctx.ICtx;
 import pasa.cbentley.core.src4.ctx.IToStringFlags;
 import pasa.cbentley.core.src4.ctx.UCtx;
-import pasa.cbentley.core.src4.i8n.IString;
+import pasa.cbentley.core.src4.i8n.I8nString;
 import pasa.cbentley.core.src4.i8n.IStringMapper;
 import pasa.cbentley.core.src4.i8n.IStringProducer;
 import pasa.cbentley.core.src4.i8n.LString;
@@ -138,23 +138,23 @@ public class StringProducerFramework extends StringProducerAbstract implements I
       }
    }
 
-   public IString getIString(int key) {
+   public I8nString getIString(int key) {
       LStringFramework sl = new LStringFramework(loc, key);
       return sl;
    }
 
-   public IString getIString(String key, String def) {
+   public I8nString getIString(String key, String def) {
       LString sl = new LString(this, key, def);
       return sl;
    }
 
-   public IString getIString(String key, String def, String suffix) {
+   public I8nString getIString(String key, String def, String suffix) {
       LString sl = new LString(this, key, def);
       sl.setSuffix(suffix);
       return sl;
    }
 
-   public IString getIStringKey(int key, String def) {
+   public I8nString getIStringKey(int key, String def) {
       LString sl = new LString(this, key, def);
       return sl;
    }
