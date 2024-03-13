@@ -43,7 +43,7 @@ public class CtxStringsData implements IStringable {
          throw new NullPointerException();
       }
       //#enddebug
-      this.uc = loc.getUCtx();
+      this.uc = loc.getUC();
    }
 
    public IPowerCharCollector getCharscollector() {
@@ -208,7 +208,7 @@ public class CtxStringsData implements IStringable {
    }
 
    public UCtx toStringGetUCtx() {
-      return loc.getUCtx();
+      return loc.getUC();
    }
 
    //#enddebug

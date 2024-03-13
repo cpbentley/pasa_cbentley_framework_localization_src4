@@ -58,9 +58,9 @@ public class StringProducerFramework extends StringProducerAbstract implements I
     * @param num
     */
    public StringProducerFramework(LocalizationCtx loc, LocaleID[] lids) {
-      super(loc.getUCtx(), lids);
+      super(loc.getUC(), lids);
       this.loc = loc;
-      this.uc = loc.getUCtx();
+      this.uc = loc.getUC();
       ctxStringDatas = new IntToObjects(uc);
    }
 
